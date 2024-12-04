@@ -6,7 +6,6 @@ from email.mime.multipart import MIMEMultipart # Module-multipart
 import mysql.connector as m
 import pandas as pd
 from datetime import date
-import requests
 
 st.set_page_config(
     page_title="SHM Airlines",
