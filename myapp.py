@@ -77,7 +77,7 @@ def admin_sidebar():
 
 # Function to connect to MySQL database
 def connect_to_db():
-    mycon = m.connect(host="localhost",user="root",password="mithu",database="airlines")
+    mycon = m.connect(host="2401:4900:1cd0:9740:a893:d5ed:6517:77db",user="root",password="mithu",database="airlines")
     return mycon
 
 # Function to generate an OTP
