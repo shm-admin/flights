@@ -1,8 +1,8 @@
 import streamlit as st
 import random
 import smtplib
-from email.mime.text import MIMEText # Module-email 
-from email.mime.multipart import MIMEMultipart # Module-multipart
+from email.mime.text import MIMEText  
+from email.mime.multipart import MIMEMultipart 
 import mysql.connector as m
 import pandas as pd
 from datetime import date
@@ -77,7 +77,7 @@ def admin_sidebar():
 
 # Function to connect to MySQL database
 def connect_to_db():
-    mycon = m.connect(host="0.0.0.0",user="root",password="mithu",database="airlines")
+    mycon = m.connect(host="brhifsm1zltpdyrpaeem-mysql.services.clever-cloud.com",user="u9or9yhkqbewfszd",password="WxleyqrSpwTM9AdRwyeE",database="brhifsm1zltpdyrpaeem")
     return mycon
 
 # Function to generate an OTP
@@ -116,14 +116,12 @@ def send_otp_email(recipient_email):
         st.error(f"An SMTP error occurred: {e}")
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
-    
+
+# Function to send ticket via mail   
 def send_ticket_email(to_email, flight_details, passenger_details):
     sender_email = "shm.airlines2024@gmail.com"
     sender_password = "ispa gtza rkin drcy"
-
     subject = "Your Flight Ticket Confirmation"
-
-    # Format the ticket as plain text with loops for passenger details
     ticket_content = f"""
     ============================
     Flight Ticket Confirmation
@@ -142,7 +140,6 @@ def send_ticket_email(to_email, flight_details, passenger_details):
     Passenger Information:
     ---------------------------"""
 
-    # Add passenger details dynamically using a for loop
     for idx, passenger in enumerate(passenger_details, 1):
         ticket_content += f"""
         Passenger {idx}:
@@ -152,12 +149,13 @@ def send_ticket_email(to_email, flight_details, passenger_details):
         Age: {passenger['age']}
         Gender: {passenger['gender']}
         Food Preference: {passenger['inflight_food']}
+        Ticket Price (₹): {passenger['fare']}
         """
 
     ticket_content += """
-    ============================
+    ====================================
     Thank you for choosing our airline!
-    ============================
+    ====================================
     """
 
     msg = MIMEMultipart()
@@ -175,9 +173,71 @@ def send_ticket_email(to_email, flight_details, passenger_details):
     except Exception as e:
         print(f"Error sending email to {to_email}: {e}")
 
+# Function to send ticket via mail   
+def send_updatedticket_email(to_email, flight_details, passenger_details):
+    sender_email = "shm.airlines2024@gmail.com"
+    sender_password = "ispa gtza rkin drcy"
+    subject = "Your Updated Flight Ticket Confirmation"
+    ticket_content = f"""
+    ==================================
+    Updated Flight Ticket Confirmation
+    ==================================
+
+    Flight Details:
+    ----------------
+    Flight Number: {flight_details[0]["fid"]}
+    Departure: {flight_details[0]["departure"]} -> {flight_details[0]["arrival"]}
+    Date of Travel: {passenger_details[0]["flight_date"]}
+    Time of Departure: {flight_details[0]["dtime"]}
+
+    ------------------------------
+    Updated Passenger Information:
+    ------------------------------"""
+
+    for idx, passenger in enumerate(passenger_details, 1):
+        ticket_content += f"""
+        Passenger {idx}:
+        -----------------
+        Passenegr ID: {passenger['id']}
+        Name: {passenger['name']}
+        Age: {passenger['age']}
+        Gender: {passenger['gender']}
+        Class: {passenger['seat_type']}
+        Food Preference: {passenger['inflight_food']}
+        Ticket Price (₹): {passenger['fare']}
+        """
+
+    ticket_content += """
+    ====================================
+    Thank you for choosing our airline!
+    ====================================
+    """
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(ticket_content, 'plain'))
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, to_email, msg.as_string())
+            print(f"Tickets have been sent to {to_email}")
+    except Exception as e:
+        print(f"Error sending email to {to_email}: {e}")
+
+
+# Function to calculate price of 1 ticket
+def calculate_unit_price(base_price, class_multiplier):
+    return base_price * class_multiplier
+
+# Function to calculate total price
 def calculate_ticket_price(base_price, class_multiplier, num_passengers):
     return base_price * class_multiplier * num_passengers
 
+# Function to fetch departure and arrival cities from the SQL table
 def cities():
     my_db = connect_to_db()
     cursor = my_db.cursor()
@@ -190,6 +250,7 @@ def cities():
     my_db.close()
     return dept, arr
 
+# Function to search available flights
 def search_flights(d_city, a_city):
     my_db = connect_to_db()
     cursor = my_db.cursor()
@@ -199,9 +260,11 @@ def search_flights(d_city, a_city):
     my_db.close()
     return details
 
+# Function to generate random passenegr ID
 def generate_pid():
     return random.randint(1, 10000)
 
+# Function to insert tickets in SQL table
 def insert_data(data):
     if not data:
         print("No data to insert.")
@@ -222,7 +285,8 @@ def insert_data(data):
         cursor.close()
         my_db.close()
 
-def fetch_passenger_data():
+# Function to fetch user details
+def fetch_user_data():
     db_connection = connect_to_db()
     cursor = db_connection.cursor(dictionary=True)
     query = "SELECT * FROM users WHERE email = %s"
@@ -231,6 +295,7 @@ def fetch_passenger_data():
     db_connection.close()
     return record
 
+# Function to fetch passenger details
 def fetch_passenger_details2():
     db_connection = connect_to_db()
     cursor = db_connection.cursor(dictionary=True)
@@ -240,6 +305,7 @@ def fetch_passenger_details2():
     db_connection.close()
     return data
 
+# Function to cross check existing user
 def check_user_login(email, password):
     db_connection = connect_to_db()
     if db_connection:
@@ -254,20 +320,19 @@ def check_user_login(email, password):
         db_connection.close()        
     return None
 
-def check_user_signin(email):
+# Funtion to check whether the mail ID already exists or not
+def check_user_signup(email):
     db_connection = connect_to_db()
     if db_connection:
         cursor = db_connection.cursor()
         query = "SELECT * FROM users WHERE email = %s"
         cursor.execute(query, (email,))
         result = cursor.fetchone()
-        if result:
-            username = result[2]
-            st.session_state.username = username
-            return result
         db_connection.close()
+        return result
     return None
 
+# Function to save the new user
 def save_user(email, password, username):
     db_connection = connect_to_db()
     if db_connection:
@@ -280,6 +345,7 @@ def save_user(email, password, username):
     else:
         st.error("Failed to register user.")
 
+# Function to fetch passenger details
 def fetch_passenger_data1(passenger_id, flight_number):
     connection = connect_to_db()
     if connection:
@@ -291,6 +357,7 @@ def fetch_passenger_data1(passenger_id, flight_number):
         return result
     return []
 
+# Function to update passenger details
 def update_passenger_data(passenger_id, flight_number, name, gender, age, inflight_food):
     connection = connect_to_db()
     if connection:
@@ -309,7 +376,8 @@ def update_passenger_data(passenger_id, flight_number, name, gender, age, inflig
         finally:
             cursor.close()
             connection.close()
-            
+
+# Function to display the updated passenger data           
 def display_updated_passenger_data(passenger_id, flight_number):
     connection = connect_to_db()
     if connection:
@@ -329,7 +397,8 @@ def display_updated_passenger_data(passenger_id, flight_number):
             connection.close()
     return []
 
-def search_records(search_type, search_value):
+# Function to search passeneger(s)
+def search_passenger_records(search_type, search_value):
     db_connection = connect_to_db()
     if db_connection:
         cursor = db_connection.cursor(dictionary=True)
@@ -352,7 +421,8 @@ def search_records(search_type, search_value):
     else:
         return []
 
-def search_records(search_value):
+# Function to search a user
+def search_user_records(search_value):
     db_connection = connect_to_db()
     if db_connection:
         cursor = db_connection.cursor(dictionary=True)
@@ -364,7 +434,8 @@ def search_records(search_value):
     else:
         return []
 
-def search_records(search_value1, search_value2):
+# Function to search flight(s)
+def search_flight(search_value1, search_value2):
     db_connection = connect_to_db()
     if db_connection:
         cursor = db_connection.cursor(dictionary=True)
@@ -377,6 +448,20 @@ def search_records(search_value1, search_value2):
     else:
         return []
 
+# Function to fetch flight details using flight number
+def fetch_flight(flight_number):
+    db_connection = connect_to_db()
+    if db_connection:
+        cursor = db_connection.cursor(dictionary=True)
+        query = "SELECT * FROM flights WHERE fid = %s"
+        cursor.execute(query, (flight_number,))
+        records = cursor.fetchall()
+        db_connection.close()
+        return records
+    else:
+        return []
+
+# Function to send reply to the user
 def send_reply_email(reply_email, subject, message):
     try:
         sender_email = "shm.airlines2024@gmail.com"
@@ -420,6 +505,9 @@ if st.session_state.page == "main":
 
     elif st.session_state.mode == "Sign Up":
         email = st.text_input("Enter your E-Mail:")
+        present_user = check_user_signup(email)
+        if present_user:
+            st.warning(f"{email} already exists!")
         password = st.text_input("Enter your Password:", type="password")
         username = st.text_input("Enter your Name:")
         st.session_state.username = username
@@ -459,36 +547,37 @@ if st.session_state.page == "main":
                      - These terms are governed by the laws of the country where SHM Airlines operates. Any disputes will be resolved under the jurisdiction of the respective courts.
                     """)
         check = st.checkbox("I agree to the terms and conditions")
-        if check:
-            if st.button("Get OTP"):
-                if email and password and username:
-                    st.session_state.email = email
-                    send_otp_email(email)
-                    st.session_state.otp_sent = True
-                else:
-                    st.error("Please fill in all required fields!")
-
-            if st.session_state.get("otp_sent", False):
-                st.title("OTP Verification")
-                otp_input = st.text_input("Enter the OTP:", type="password")
-                verify_button = st.button("Verify OTP")
-                resend_otp_button = st.button("Resend OTP")
-
-                if verify_button:
-                    if otp_input == str(st.session_state.get("otp", "")):
-                        st.success("OTP Verified Successfully!")
-                        if st.session_state.mode == "Sign Up":
-                            save_user(email, password, username)  # Save user during Sign Up
-                        st.session_state.page = "home"
-                        st.session_state.otp_sent = False
+        if not present_user:
+            if check:
+                if st.button("Get OTP"):
+                    if email and password and username:
+                        st.session_state.email = email
+                        send_otp_email(email)
+                        st.session_state.otp_sent = True
                     else:
-                        st.error("Incorrect OTP. Please try again.")
+                        st.error("Please fill in all required fields!")
 
-                if resend_otp_button:
-                    send_otp_email(email)
-                    st.success("A new OTP has been sent.")
-        else:
-            st.warning("You must agree to the Terms and Conditions to proceed.")
+                if st.session_state.get("otp_sent", False):
+                    st.title("OTP Verification")
+                    otp_input = st.text_input("Enter the OTP:", type="password")
+                    verify_button = st.button("Verify OTP")
+                    resend_otp_button = st.button("Resend OTP")
+
+                    if verify_button:
+                        if otp_input == str(st.session_state.get("otp", "")):
+                            st.success("OTP Verified Successfully!")
+                            if st.session_state.mode == "Sign Up":
+                                save_user(email, password, username)  # Save user during Sign Up
+                            st.session_state.page = "home"
+                            st.session_state.otp_sent = False
+                        else:
+                            st.error("Incorrect OTP. Please try again.")
+
+                    if resend_otp_button:
+                        send_otp_email(email)
+                        st.success("A new OTP has been sent.")
+            else:
+                st.warning("You must agree to the Terms and Conditions to proceed.")
 
     elif st.session_state.mode == "Login":
         email = st.text_input("Enter your registered E-Mail:")
@@ -531,15 +620,17 @@ You are logged into the SHM Airlines Admin Dashboard. From here, you can manage 
 # t_details page
 elif st.session_state.page == "t_details":
     admin_sidebar()
-    # Streamlit UI for Search
     st.title("Search Passenger Records")
     search_type = st.selectbox("Search By:", ["Passenger ID", "Name", "Date (YYYY-MM-DD)", "Display all passengers"])
 
     if search_type != "Display all passengers":
         search_value = st.text_input(f"Enter {search_type}:")
         if st.button("Search"):
-            if search_value.strip():  # Ensure the input is not empty
-                data = search_records(search_type, search_value)
+            if search_value.strip():
+                if search_type == "Date (YYYY-MM-DD)":
+                    data = search_passenger_records("Date", search_value)
+                else:
+                    data = search_passenger_records(search_type, search_value)
                 if data:
                     st.success(f"Found {len(data)} record(s) matching {search_type}: {search_value}")
                     df = pd.DataFrame(data)
@@ -567,8 +658,8 @@ elif st.session_state.page == "u_details":
     if search_type == "Email":
         search_value = st.text_input(f"Enter email id:")
         if st.button("Search"):
-            if search_value.strip():  # Ensure the input is not empty
-                data = search_records(search_value)
+            if search_value.strip(): 
+                data = search_user_records(search_value)
                 if data:
                     st.success(f"Found {len(data)} record(s) matching {search_value}")
                     df = pd.DataFrame(data)
@@ -590,15 +681,14 @@ elif st.session_state.page == "u_details":
 #f_details
 elif st.session_state.page == "f_details":
     admin_sidebar()
-    # Streamlit UI for Search
     st.title("Search Flights")
     search_type = st.selectbox("Search By:", ["Display all flights", "Departure & Arrival"])
     if search_type == "Departure & Arrival": 
-        search_value1 = st.text_input(f"Enter Departure Airport{search_type}:")
-        search_value2 = st.text_input(f"Enter Arrival Airport{search_type}:")
+        search_value1 = st.text_input(f"Enter Departure Airport:")
+        search_value2 = st.text_input(f"Enter Arrival Airport:")
         if st.button("Search"):
-            if search_value1.strip and search_value2.strip():  # Ensure the input is not empty
-                data = search_records(search_value1, search_value2)
+            if search_value1.strip and search_value2.strip():
+                data = search_flight(search_value1, search_value2)
                 if data:
                     st.success(f"Found {len(data)} record(s) matching {search_type}: {search_value1} & {search_value2}")
                     df = pd.DataFrame(data)
@@ -606,8 +696,7 @@ elif st.session_state.page == "f_details":
                 else:
                     st.warning(f"No records found for {search_type}: {search_value1} & {search_value2}")
             else:
-                st.error(f"Please enter a valid {search_type}.")
-    
+                st.error(f"Please enter a valid {search_type}.")    
     else:
         db_connection = connect_to_db()
         cursor = db_connection.cursor(dictionary=True)
@@ -636,12 +725,10 @@ elif st.session_state.page == "fq_details":
 # Send reply
 elif st.session_state.page == 'reply':
     admin_sidebar()
-    # Input fields
     reply_email = st.text_input("Recipient Email:", placeholder="Enter recipient's email")
     subject = st.text_input("Subject:", placeholder="Enter email subject")
     message = st.text_area("Message:", placeholder="Type your reply message here")
 
-    # Button to send email
     if st.button("Send Reply"):
         if reply_email and subject and message.strip():
             if send_reply_email(reply_email, subject, message):
@@ -688,6 +775,8 @@ elif st.session_state.page == "Book Ticket":
                     total_ftime = flight_info[3]
 
                     num_passengers = st.number_input("Number of Passengers", min_value=1, value=1)
+                    class_multiplier = flight_classes[flight_class]
+                    unit_price = calculate_unit_price(base_price, class_multiplier)
                     passenger_details = []
 
                     for i in range(1, num_passengers + 1):
@@ -707,11 +796,11 @@ elif st.session_state.page == "Book Ticket":
                                 "age": age,
                                 "inflight_food": food,
                                 "seat_type": flight_class,
-                                "flight_date": travel_date
+                                "flight_date": travel_date,
+                                "fare": unit_price
                             })
                 
                     formatted_date = travel_date.strftime('%Y-%m-%d')
-                    class_multiplier = flight_classes[flight_class]
                     total_price = calculate_ticket_price(base_price, class_multiplier, num_passengers)
                     flight_info += (formatted_date,flight_class,total_price)
                     flight_infod = {"fid":flight_info[0],"departure":flight_info[1],"arrival":flight_info[2],"date":formatted_date,"dtime":flight_info[4],"class":flight_info[7],"total_price":flight_info[8]}
@@ -775,10 +864,10 @@ elif st.session_state.page == "Cancel Ticket":
 elif st.session_state.page == "Update Ticket":
     sidebar()
     st.title("Update Ticket")
-    # Streamlit UI for updating tickets
     st.subheader("Search Passenger Details")
     passenger_id = st.text_input("Enter Passenger ID for Search:")
     flight_number = st.text_input("Enter Flight Number for Search:")
+    flight_detail = fetch_flight(flight_number)
     current_date = date.today()
     if st.button("Fetch Data"):
         if passenger_id and flight_number:
@@ -808,6 +897,7 @@ elif st.session_state.page == "Update Ticket":
                 update_passenger_data(passenger_id, flight_number, name, gender, age, inflight_food)
                 updated_data = display_updated_passenger_data(passenger_id, flight_number)
                 if updated_data:
+                    send_updatedticket_email(st.session_state.email, flight_detail, updated_data)
                     st.subheader("Updated Passenger Details")
                     updated_df = pd.DataFrame(updated_data)
                     st.dataframe(updated_df)
@@ -852,7 +942,7 @@ elif st.session_state.page == 'Feedback and Queries':
 # User Account
 elif st.session_state.page == 'Account':
     sidebar()
-    data = fetch_passenger_data()
+    data = fetch_user_data()
     st.title('Your Account Details')
     st.write("Username :",data["username"])
     st.write("Password :",data["password"])
