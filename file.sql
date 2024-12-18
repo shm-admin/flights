@@ -34,7 +34,7 @@ CREATE TABLE `feedbacks` (
 
 LOCK TABLES `feedbacks` WRITE;
 /*!40000 ALTER TABLE `feedbacks` DISABLE KEYS */;
-INSERT INTO `feedbacks` VALUES ('mithilesh.v2007@gmail.com','dhauilrhjckr\n'),('mithilesh.v2007@gmail.com','Vanakam da mapla, tab la irundhu'),('mithilesh.v2007@gmail.com','How can i update a ticket ??\n'),('mithilesh.v03@gmail.com','hjky'),('mithilesh.v2007@gmail.com','djckh.jaw\n');
+INSERT INTO `feedbacks` VALUES ('alphabach4@gmail.com','Hi\n');
 /*!40000 ALTER TABLE `feedbacks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -83,6 +83,7 @@ CREATE TABLE `passenger_details` (
   `inflight_food` varchar(10) DEFAULT NULL,
   `seat_type` varchar(20) DEFAULT NULL,
   `flight_date` date DEFAULT NULL,
+  `fare` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -93,7 +94,7 @@ CREATE TABLE `passenger_details` (
 
 LOCK TABLES `passenger_details` WRITE;
 /*!40000 ALTER TABLE `passenger_details` DISABLE KEYS */;
-INSERT INTO `passenger_details` VALUES ('SHM191',335,'Charu','mithilesh.v2007@gmail.com','Female',16,'Veg','Economy','2024-12-05'),('SHM161',6995,'MITHU','mithilesh.v2007@gmail.com','Female',1,'Veg','First Class','2024-12-31'),('SHM191',8344,'Ajay','mithilesh.v2007@gmail.com','Male',18,'Veg','Economy','2024-12-05'),('SHM156',8525,'Admin','shm.airlines2024@gmail.com','Male',1,'Veg','Economy','2024-12-24');
+INSERT INTO `passenger_details` VALUES ('SHM105',3064,'Monica.S.M','alphabach4@gmail.com','Female',29,'Veg','Business','2024-12-31',13750),('SHM159',7393,'Ajay','mithilesh.v2007@gmail.com','Male',19,'None','Business','2024-12-24',13000);
 /*!40000 ALTER TABLE `passenger_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -118,7 +119,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('ajaylaxman2404@gmail.com','aaaaa2005','Ajay'),('mithilesh.v2007@gmail.com','Mithilesh','Mithilesh');
+INSERT INTO `users` VALUES ('ajaylaxman2404@gmail.com','aaaaa2005','Ajay'),('alphabach4@gmail.com','alpha@123','Alpha'),('mithilesh.v03@gmail.com','Mithu','Mithu'),('mithilesh.v2007@gmail.com','Mithilesh','Mithilesh');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -131,4 +132,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-04 22:42:57
+-- Dump completed on 2024-12-11  0:27:37
